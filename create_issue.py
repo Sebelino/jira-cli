@@ -21,6 +21,7 @@ class IssueCreator:
         self.project_key = config["project_key"]
         self.summary = config["summary"]
         self.issuetype = config["issuetype"]
+        self.assignee = config["assignee"]
 
         self._sprint_field = None
 
@@ -60,12 +61,8 @@ class IssueCreator:
 
     def postprocess_issue(self, issue):
         self.remove_labels(issue)
-        my_name = self.get_my_name()
-        assignee_accountid = self.get_assignee_accountid(my_name)
+        assignee_accountid = self.get_assignee_accountid(self.assignee)
         self.assign(issue, assignee_accountid)
-
-    def get_my_name(self):
-        return "Sebastian Olsson"
 
     def remove_labels(self, issue):
         labels = self.jira.get_issue_labels(issue['id'])
