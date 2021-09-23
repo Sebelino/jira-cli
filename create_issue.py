@@ -60,8 +60,12 @@ class IssueCreator:
 
     def postprocess_issue(self, issue):
         self.remove_labels(issue)
-        assignee_accountid = self.get_assignee_accountid()
+        my_name = self.get_my_name()
+        assignee_accountid = self.get_assignee_accountid(my_name)
         self.assign(issue, assignee_accountid)
+
+    def get_my_name(self):
+        return "Sebastian Olsson"
 
     def remove_labels(self, issue):
         labels = self.jira.get_issue_labels(issue['id'])
@@ -72,13 +76,13 @@ class IssueCreator:
         }
         self.jira.update_issue_field(issue['key'], fields)
 
-    def get_assignee_accountid(self):
+    def get_assignee_accountid(self, assignee_name):
         all_users = [u for u in self.jira.get_all_assignable_users_for_project(self.project_key, limit=self.USER_LIMIT)]
 
         if len(all_users) >= self.USER_LIMIT:
             raise Exception("This script currently assumes < 1000 Jira users")
 
-        assignee, = [u for u in all_users if 'Sebastian Olsson' in u['displayName']]
+        assignee, = [u for u in all_users if assignee_name in u['displayName']]
 
         return assignee['accountId']
 
