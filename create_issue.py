@@ -60,16 +60,17 @@ class IssueCreator:
         return self.jira.create_issue(fields)
 
     def postprocess_issue(self, issue):
-        self.remove_labels(issue)
+        self.remove_labels(issue, ["to-be-groomed"])
         assignee_accountid = self.get_assignee_accountid(self.assignee)
         self.assign(issue, assignee_accountid)
 
-    def remove_labels(self, issue):
-        labels = self.jira.get_issue_labels(issue['id'])
-        if "to-be-groomed" in labels:
-            labels.remove("to-be-groomed")
+    def remove_labels(self, issue, disposable_labels):
+        current_labels = self.jira.get_issue_labels(issue['id'])
+        for disposable_label in disposable_labels:
+            if disposable_label in current_labels:
+                current_labels.remove(disposable_label)
         fields = {
-            "labels": labels,
+            "labels": current_labels,
         }
         self.jira.update_issue_field(issue['key'], fields)
 
