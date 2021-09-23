@@ -7,7 +7,6 @@ from pprint import pprint
 class IssueCreator:
 
     USER_LIMIT = 1000
-    SPRINT_FIELD = "customfield_10019"
 
     def __init__(self):
         self.project_key = "EP"
@@ -21,16 +20,28 @@ class IssueCreator:
             password=config["api_token"],
         )
 
+        self._sprint_field = None
+
     def create(self):
         issue = self.create_issue()
         self.postprocess_issue(issue)
 
-    def create_issue(self):
+    @property
+    def sprint_custom_field(self):
+        return self._sprint_field or self.get_sprint_custom_field()
+
+    def get_sprint_custom_field(self):
+        field, = [f["id"] for f in jira.get_all_custom_fields() if f["name"] == "Sprint"]
+        return field
+
+    def get_current_sprint(self):
         board, = self.jira.get_all_agile_boards(project_key=self.project_key)["values"]
-
         all_sprints = self.jira.get_all_sprint(board["id"])
-
         current_sprint, = [s for s in all_sprints["values"] if s["state"] == "active"]
+        return current_sprint
+
+    def create_issue(self):
+        current_sprint = self.get_current_sprint()
 
         fields = {
             "summary": "(delet this) Test issue",
@@ -40,7 +51,7 @@ class IssueCreator:
             "issuetype": {
                 "name": "Task",
             },
-            self.SPRINT_FIELD: current_sprint["id"],
+            self.sprint_custom_field: current_sprint["id"],
         }
 
         return self.jira.create_issue(fields)
