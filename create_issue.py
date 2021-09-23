@@ -2,14 +2,17 @@
 
 import yaml
 from atlassian import Jira
+import argparse
 from pprint import pprint
+
+DEFAULT_CONFIG_FILE = "config.yaml"
 
 class IssueCreator:
 
     USER_LIMIT = 1000
 
-    def __init__(self):
-        with open("config.yaml", 'r') as f:
+    def __init__(self, config_file: str):
+        with open(config_file, 'r') as f:
             config = yaml.safe_load(f)
 
         self.jira = Jira(
@@ -97,8 +100,16 @@ class IssueCreator:
     def assign(self, issue, account_id):
         self.jira.assign_issue(issue['key'], account_id=account_id)
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Create an issue with minimum hassle.")
+    parser.add_argument("--config_file", "-c", type=str, default=DEFAULT_CONFIG_FILE, help="Path to configuration YAML file")
+    args = parser.parse_args()
+    return args
+
 if __name__ == "__main__":
-    creator = IssueCreator()
+    args = parse_args()
+
+    creator = IssueCreator(args.config_file)
 
     jira = creator.jira
 
