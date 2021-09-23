@@ -83,4 +83,7 @@ class IssueCreator:
 
 if __name__ == "__main__":
     creator = IssueCreator()
+
+    jira = creator.jira
+
     creator.create()
