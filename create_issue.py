@@ -61,8 +61,7 @@ class IssueCreator:
 
     def postprocess_issue(self, issue):
         self.remove_labels(issue, ["to-be-groomed"])
-        assignee_accountid = self.get_assignee_accountid(self.assignee)
-        self.assign(issue, assignee_accountid)
+        self.assign_to_me(issue)
 
     def remove_labels(self, issue, disposable_labels):
         current_labels = self.jira.get_issue_labels(issue['id'])
@@ -83,6 +82,10 @@ class IssueCreator:
         assignee, = [u for u in all_users if assignee_name in u['displayName']]
 
         return assignee['accountId']
+
+    def assign_to_me(self, issue):
+        assignee_accountid = self.get_assignee_accountid(self.assignee)
+        self.assign(issue, assignee_accountid)
 
     def assign(self, issue, account_id):
         self.jira.assign_issue(issue['key'], account_id=account_id)
