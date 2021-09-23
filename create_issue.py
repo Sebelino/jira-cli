@@ -22,7 +22,7 @@ class IssueCreator:
         self.summary = config["summary"]
         self.issuetype = config["issuetype"]
         self.assignee = config["assignee"]
-        self.in_progress_status = config["in_progress_status"]
+        self.status = config["status"]
 
         self._sprint_field = None
 
@@ -63,7 +63,7 @@ class IssueCreator:
     def postprocess_issue(self, issue):
         self.remove_labels(issue, ["to-be-groomed"])
         self.assign_to_me(issue)
-        self.move_issue_to_status(issue, self.in_progress_status)
+        self.move_issue_to_status(issue, self.status)
 
     def move_issue_to_status(self, issue, status):
         jira.issue_transition(issue["key"], status)
