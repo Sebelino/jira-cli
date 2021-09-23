@@ -20,6 +20,7 @@ class IssueCreator:
 
         self.project_key = config["project_key"]
         self.summary = config["summary"]
+        self.issuetype = config["issuetype"]
 
         self._sprint_field = None
 
@@ -50,7 +51,7 @@ class IssueCreator:
                 "key": self.project_key,
             },
             "issuetype": {
-                "name": "Task",
+                "name": self.issuetype,
             },
             self.sprint_custom_field: current_sprint["id"],
         }
