@@ -6,6 +6,8 @@ from pprint import pprint
 
 class IssueCreator:
 
+    USER_LIMIT = 1000
+
     def __init__(self):
         self.project_key = "EP"
 
@@ -40,9 +42,11 @@ class IssueCreator:
 
         jira.update_issue_field(created_issue['key'], fields)
 
-        all_users = [u for u in jira.get_all_assignable_users_for_project(self.project_key, limit=1000)]
+        self.USER_LIMIT = 1000
 
-        if len(all_users) >= 1000:
+        all_users = [u for u in jira.get_all_assignable_users_for_project(self.project_key, limit=self.USER_LIMIT)]
+
+        if len(all_users) >= self.USER_LIMIT:
             raise Exception("This script currently assumes < 1000 Jira users")
 
         me, = [u for u in all_users if 'Sebastian Olsson' in u['displayName']]
