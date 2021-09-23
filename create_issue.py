@@ -7,6 +7,7 @@ from pprint import pprint
 class IssueCreator:
 
     USER_LIMIT = 1000
+    SPRINT_FIELD = "customfield_10019"
 
     def __init__(self):
         self.project_key = "EP"
@@ -39,7 +40,7 @@ class IssueCreator:
             "issuetype": {
                 "name": "Task",
             },
-            "customfield_10019": current_sprint["id"],
+            self.SPRINT_FIELD: current_sprint["id"],
         }
 
         return self.jira.create_issue(fields)
