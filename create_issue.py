@@ -9,8 +9,6 @@ class IssueCreator:
     USER_LIMIT = 1000
 
     def __init__(self):
-        self.project_key = "EP"
-
         with open("config.yaml", 'r') as f:
             config = yaml.safe_load(f)
 
@@ -19,6 +17,8 @@ class IssueCreator:
             username=config["username"],
             password=config["api_token"],
         )
+
+        self.project_key = config["project_key"]
 
         self._sprint_field = None
 
