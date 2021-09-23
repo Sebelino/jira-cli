@@ -12,6 +12,10 @@ class IssueCreator:
         self.project_key = "EP"
 
     def create(self):
+        issue = self.create_issue()
+        self.postprocess_issue(issue)
+
+    def create_issue(self):
         board, = jira.get_all_agile_boards(project_key=self.project_key)["values"]
 
         all_sprints = jira.get_all_sprint(board["id"])
@@ -29,21 +33,22 @@ class IssueCreator:
             "customfield_10019": current_sprint["id"],
         }
 
-        created_issue = jira.create_issue(fields)
+        return jira.create_issue(fields)
 
-        labels = jira.get_issue_labels(created_issue['id'])
+    def postprocess_issue(self, issue):
+        self.remove_labels(issue)
+        self.assign(issue)
 
+    def remove_labels(self, issue):
+        labels = jira.get_issue_labels(issue['id'])
         if "to-be-groomed" in labels:
             labels.remove("to-be-groomed")
-
         fields = {
             "labels": labels,
         }
+        jira.update_issue_field(issue['key'], fields)
 
-        jira.update_issue_field(created_issue['key'], fields)
-
-        self.USER_LIMIT = 1000
-
+    def assign(self, issue):
         all_users = [u for u in jira.get_all_assignable_users_for_project(self.project_key, limit=self.USER_LIMIT)]
 
         if len(all_users) >= self.USER_LIMIT:
@@ -53,7 +58,7 @@ class IssueCreator:
 
         my_accountid = me['accountId']
 
-        jira.assign_issue(created_issue['key'], account_id=my_accountid)
+        jira.assign_issue(issue['key'], account_id=my_accountid)
 
 if __name__ == "__main__":
 
