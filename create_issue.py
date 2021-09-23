@@ -77,7 +77,7 @@ class IssueCreator:
         all_users = [u for u in self.jira.get_all_assignable_users_for_project(self.project_key, limit=self.USER_LIMIT)]
 
         if len(all_users) >= self.USER_LIMIT:
-            raise Exception("This script currently assumes < 1000 Jira users")
+            raise Exception("This script currently assumes < {} Jira users".format(self.USER_LIMIT))
 
         assignee, = [u for u in all_users if assignee_name in u['displayName']]
 
