@@ -1,0 +1,9 @@
+url: "https://mycompany.atlassian.net"
+username: "john.doe@mycompany.com"
+api_token: "(Generate a personal access token and put it here)"
+
+project_key: "(If an issue is named e.g. HOY-123, then put 'HOY' here)"
+summary: "Sample issue"
+issuetype: "Task"
+assignee: "John Doe"
+status: "In Progress"
