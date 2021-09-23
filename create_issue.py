@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import yaml
 from atlassian import Jira
 from pprint import pprint
 
@@ -11,8 +11,8 @@ class IssueCreator:
     def __init__(self):
         self.project_key = "EP"
 
-        with open("credentials.json", 'r') as f:
-            credentials = json.load(f)
+        with open("config.yaml", 'r') as f:
+            credentials = yaml.safe_load(f)
 
         self.jira = Jira(
             url=credentials["url"],
