@@ -9,3 +9,9 @@ summary: "Sample issue"
 issuetype: "Task"
 assignee: "John Doe"
 status: "In Progress"
+description: |
+  *Acceptance criteria:*
+
+  * ...
+
+  *Background:*

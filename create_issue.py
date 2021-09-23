@@ -23,6 +23,7 @@ class IssueCreator:
         self.issuetype = config["issuetype"]
         self.assignee = config["assignee"]
         self.status = config["status"]
+        self.description = config["description"]
 
         self._sprint_field = None
 
@@ -55,6 +56,7 @@ class IssueCreator:
             "issuetype": {
                 "name": self.issuetype,
             },
+            "description": self.description,
             self.sprint_custom_field: current_sprint["id"],
         }
 
