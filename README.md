@@ -1,5 +1,7 @@
 # jira-cli
 
+This script creates a Jira issue, moves it onto the board, assigns it to me, and moves it to "In Progress".
+
 ## Setup
 ```
 $ cp example.config.yaml config.yaml
