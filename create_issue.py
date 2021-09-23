@@ -60,7 +60,7 @@ class IssueCreator:
 
     def postprocess_issue(self, issue):
         self.remove_labels(issue)
-        my_accountid = self.get_my_accountid()
+        my_accountid = self.get_assignee_accountid()
         self.assign(issue, my_accountid)
 
     def remove_labels(self, issue):
@@ -72,7 +72,7 @@ class IssueCreator:
         }
         self.jira.update_issue_field(issue['key'], fields)
 
-    def get_my_accountid(self):
+    def get_assignee_accountid(self):
         all_users = [u for u in self.jira.get_all_assignable_users_for_project(self.project_key, limit=self.USER_LIMIT)]
 
         if len(all_users) >= self.USER_LIMIT:
