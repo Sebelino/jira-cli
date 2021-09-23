@@ -78,9 +78,9 @@ class IssueCreator:
         if len(all_users) >= self.USER_LIMIT:
             raise Exception("This script currently assumes < 1000 Jira users")
 
-        me, = [u for u in all_users if 'Sebastian Olsson' in u['displayName']]
+        assignee, = [u for u in all_users if 'Sebastian Olsson' in u['displayName']]
 
-        return me['accountId']
+        return assignee['accountId']
 
     def assign(self, issue, account_id):
         self.jira.assign_issue(issue['key'], account_id=account_id)
