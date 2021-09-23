@@ -13,12 +13,12 @@ class IssueCreator:
         self.project_key = "EP"
 
         with open("config.yaml", 'r') as f:
-            credentials = yaml.safe_load(f)
+            config = yaml.safe_load(f)
 
         self.jira = Jira(
-            url=credentials["url"],
-            username=credentials["username"],
-            password=credentials["api_token"],
+            url=config["url"],
+            username=config["username"],
+            password=config["api_token"],
         )
 
     def create(self):
