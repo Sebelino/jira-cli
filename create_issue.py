@@ -60,8 +60,8 @@ class IssueCreator:
 
     def postprocess_issue(self, issue):
         self.remove_labels(issue)
-        my_accountid = self.get_assignee_accountid()
-        self.assign(issue, my_accountid)
+        assignee_accountid = self.get_assignee_accountid()
+        self.assign(issue, assignee_accountid)
 
     def remove_labels(self, issue):
         labels = self.jira.get_issue_labels(issue['id'])
