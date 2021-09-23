@@ -19,6 +19,7 @@ class IssueCreator:
         )
 
         self.project_key = config["project_key"]
+        self.summary = config["summary"]
 
         self._sprint_field = None
 
@@ -44,7 +45,7 @@ class IssueCreator:
         current_sprint = self.get_current_sprint()
 
         fields = {
-            "summary": "(delet this) Test issue",
+            "summary": self.summary,
             "project": {
                 "key": self.project_key,
             },
