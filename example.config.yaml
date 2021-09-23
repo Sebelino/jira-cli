@@ -1,3 +1,5 @@
+# Make a copy of this file named "config.yaml" and adjust it to your needs.
+
 url: "https://mycompany.atlassian.net"
 username: "john.doe@mycompany.com"
 api_token: "(Generate a personal access token and put it here)"
