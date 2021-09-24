@@ -40,6 +40,7 @@ class IssueCreator:
 
     def get_sprint_custom_field(self):
         field, = [f["id"] for f in jira.get_all_custom_fields() if f["name"] == "Sprint"]
+        self._sprint_field = field
         return field
 
     def get_current_sprint(self):
