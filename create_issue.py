@@ -101,6 +101,7 @@ class IssueCreator:
 def parse_args():
     parser = argparse.ArgumentParser(description="Create an issue with minimum hassle.")
     parser.add_argument("--config_file", "-c", type=str, default=DEFAULT_CONFIG_FILE, help="Path to configuration YAML file")
+    parser.add_argument("--noop", "-n", action="store_true", help="If set, don't create an issue")
     args = parser.parse_args()
     return args
 
@@ -111,4 +112,5 @@ if __name__ == "__main__":
 
     jira = creator.jira
 
-    creator.create()
+    if not args.noop:
+        creator.create()
