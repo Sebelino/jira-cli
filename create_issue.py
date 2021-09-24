@@ -5,8 +5,10 @@ from atlassian import Jira
 import argparse
 from pprint import pprint
 import requests
+import os
 
 DEFAULT_CONFIG_FILE = "config.yaml"
+API_TOKEN_ENVVAR = "JIRA_CLI_API_TOKEN"
 
 class IssueCreator:
 
@@ -19,7 +21,7 @@ class IssueCreator:
         self.jira = Jira(
             url=config["url"],
             username=config["username"],
-            password=config["api_token"],
+            password=self.read_api_token(config),
         )
 
         self.project_key = config["project_key"]
@@ -36,6 +38,16 @@ class IssueCreator:
     def create(self):
         issue = self.create_issue()
         self.postprocess_issue(issue)
+
+    @staticmethod
+    def read_api_token(config):
+        config_value = config.get("api_token")
+        envvar_value = os.getenv(API_TOKEN_ENVVAR)
+        if config_value and envvar_value:
+            raise Exception("API token cannot be set in both the configuration file and in the {} environment variable.".format(API_TOKEN_ENVVAR))
+        if not config_value and not envvar_value:
+            raise Exception("API token missing. Either set api_token in the configuration file or set it in the {} environment variable.".format(API_TOKEN_ENVVAR))
+        return config_value or envvar_value
 
     @property
     def sprint_custom_field(self):
