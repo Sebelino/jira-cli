@@ -4,6 +4,8 @@ This script creates a Jira issue, moves it onto the board, assigns it to me, and
 
 ## Setup
 ```
+$ git clone https://github.com/Sebelino/jira-cli
+$ cd jira-cli/
 $ cp example.config.yaml config.yaml
 $ python3 -m venv .venv
 $ source .venv/bin/activate
