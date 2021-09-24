@@ -4,6 +4,7 @@ import yaml
 from atlassian import Jira
 import argparse
 from pprint import pprint
+import requests
 
 DEFAULT_CONFIG_FILE = "config.yaml"
 
@@ -29,6 +30,8 @@ class IssueCreator:
         self.description = config["description"]
 
         self._sprint_field = None
+        self._board_supports_sprints = None
+        self._current_sprint_id = None
 
     def create(self):
         issue = self.create_issue()
@@ -38,20 +41,39 @@ class IssueCreator:
     def sprint_custom_field(self):
         return self._sprint_field or self.get_sprint_custom_field()
 
+    @property
+    def current_sprint_id(self):
+        return self._current_sprint_id or self.get_current_sprint_id()
+
+    @property
+    def board_supports_sprints(self):
+        if self._board_supports_sprints is not None:
+            return self._board_supports_sprints
+        current_sprint_id = self.get_current_sprint_id()
+        if current_sprint_id is None:
+            self._board_supports_sprints = False
+            return False
+        self._current_sprint_id = current_sprint_id
+        self._board_supports_sprints = True
+        return True
+
     def get_sprint_custom_field(self):
         field, = [f["id"] for f in jira.get_all_custom_fields() if f["name"] == "Sprint"]
         self._sprint_field = field
         return field
 
-    def get_current_sprint(self):
+    def get_current_sprint_id(self):
         board, = self.jira.get_all_agile_boards(project_key=self.project_key)["values"]
-        all_sprints = self.jira.get_all_sprint(board["id"])
+        try:
+            all_sprints = self.jira.get_all_sprint(board["id"])
+        except requests.exceptions.HTTPError as e:
+            if str(e) == "The board does not support sprints":
+                return None
+            raise e
         current_sprint, = [s for s in all_sprints["values"] if s["state"] == "active"]
-        return current_sprint
+        return current_sprint["id"]
 
     def create_issue(self):
-        current_sprint = self.get_current_sprint()
-
         fields = {
             "summary": self.summary,
             "project": {
@@ -61,8 +83,10 @@ class IssueCreator:
                 "name": self.issuetype,
             },
             "description": self.description,
-            self.sprint_custom_field: current_sprint["id"],
         }
+
+        if self.board_supports_sprints:
+            fields[self.sprint_custom_field] = self.current_sprint_id
 
         return self.jira.create_issue(fields)
 
