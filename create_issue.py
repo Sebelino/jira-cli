@@ -68,7 +68,7 @@ class IssueCreator:
 
     def postprocess_issue(self, issue):
         self.remove_labels(issue, ["to-be-groomed"])
-        self.assign_to_me(issue)
+        self.assign(issue, self.assignee)
         self.move_issue_to_status(issue, self.status)
 
     def move_issue_to_status(self, issue, status):
@@ -94,12 +94,9 @@ class IssueCreator:
 
         return assignee['accountId']
 
-    def assign_to_me(self, issue):
-        assignee_accountid = self.get_assignee_accountid(self.assignee)
-        self.assign(issue, assignee_accountid)
-
-    def assign(self, issue, account_id):
-        self.jira.assign_issue(issue['key'], account_id=account_id)
+    def assign(self, issue, assignee):
+        assignee_accountid = self.get_assignee_accountid(assignee)
+        self.jira.assign_issue(issue['key'], account_id=assignee_accountid)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Create an issue with minimum hassle.")
