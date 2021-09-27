@@ -30,10 +30,13 @@ class IssueCreator:
         self.assignee = config["assignee"]
         self.status = config["status"]
         self.description = config["description"]
+        self.fields = config.get("fields", dict())
 
+        self._project = None
         self._sprint_field = None
         self._board_supports_sprints = None
         self._current_sprint_id = None
+        self._all_custom_fields = None
 
     def create(self):
         issue = self.create_issue()
@@ -70,9 +73,33 @@ class IssueCreator:
         return True
 
     def get_sprint_custom_field(self):
-        field, = [f["id"] for f in jira.get_all_custom_fields() if f["name"] == "Sprint"]
+        field, = [f["id"] for f in self.all_custom_fields if f["name"] == "Sprint"]
         self._sprint_field = field
         return field
+
+    @property
+    def all_custom_fields(self):
+        if not self._all_custom_fields:
+            self._all_custom_fields = self.jira.get_all_custom_fields()
+        return self._all_custom_fields
+
+    @property
+    def project(self):
+        if not self._project:
+            self._project = self.jira.get_project(self.project_key)
+        return self._project
+
+    def custom_field_name_to_id(self, field_name: str) -> str:
+        scoped_fields = [f for f in self.all_custom_fields if "scope" in f]
+        project_id = self.project["id"]
+        project_fields = [f for f in scoped_fields if f["scope"]["project"]["id"] == project_id]
+        matching_fields = [f for f in project_fields if f["name"].lower() == field_name.lower()]
+        if len(matching_fields) == 0:
+            raise Exception("There are no custom fields with the name {}".format(field_name))
+        if len(matching_fields) >= 2:
+            raise Exception("There is more than one custom field with the name {}".format(field_name))
+        matching_field, = matching_fields
+        return matching_field["id"]
 
     def get_current_sprint_id(self):
         board, = self.jira.get_all_agile_boards(project_key=self.project_key)["values"]
@@ -106,9 +133,32 @@ class IssueCreator:
         self.remove_labels(issue, ["to-be-groomed"])
         self.assign(issue, self.assignee)
         self.move_issue_to_status(issue, self.status)
+        self.set_fields(issue, self.fields)
 
     def move_issue_to_status(self, issue, status):
         jira.issue_transition(issue["key"], status)
+
+    def set_fields(self, issue, fields):
+        fields = {self.custom_field_name_to_id(k): v for k, v in fields.items()}
+        fields = {k: self.correct_field_value(v, k, issue) for k, v in fields.items()}
+        self.jira.update_issue_field(issue['key'], fields)
+
+    def correct_field_value(self, field_value, field, issue):
+        metadata = jira.issue_createmeta(self.project_key)
+        metadata, = metadata["projects"]
+        metadata, = [t for t in metadata["issuetypes"] if field in t["fields"]]
+        metadata = metadata["fields"]
+        metadata = metadata[field]
+        if "allowedValues" not in metadata:
+            return field_value
+        metadata = metadata["allowedValues"]
+        matching_options = [option for option in metadata if option["value"] == field_value]
+        if len(matching_options) == 0:
+            raise Exception("There is no option for the field {} by the name {}".format(field, field_value))
+        if len(matching_options) >= 2:
+            raise Exception("Found multiple options for the field {} matching the name {}".format(field, field_value))
+        matching_option, = matching_options
+        return {"id": matching_option["id"]}
 
     def remove_labels(self, issue, disposable_labels):
         current_labels = self.jira.get_issue_labels(issue['id'])
