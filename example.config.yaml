@@ -9,6 +9,9 @@ issuetype: "Task"
 assignee: "John Doe"
 status: "In Progress"
 summary: "Sample issue"
+fields:
+  My custom text field: "Hello"
+  My custom dropdown field: "Text value of dropdown field"
 description: |
   *Acceptance criteria:*
 
